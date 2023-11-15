@@ -3,6 +3,7 @@ package com.example.demo1.rest;
 import java.util.List;
 import java.util.Map;
 
+import org.jboss.logging.Messages;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -14,14 +15,25 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.example.demo1.Plan;
+import com.example.demo1.constants.AppConstants;
+import com.example.demo1.props.AppProperties;
 import com.example.demo1.service.PlanService;
 
 @RestController
 public class PlanRestController {
 
-	@Autowired
 	private PlanService planService;
 	
+	private AppProperties appProps;
+	
+	private Map<String, String> messages;
+	
+	public PlanRestController(PlanService planService, AppProperties appProps) {
+		
+		this.planService=planService;
+		this.messages=appProps.getMessages();
+	}
+	 
 	
 	@GetMapping("/categories")
 	public ResponseEntity<Map<Integer, String>> planCategories(){
@@ -35,14 +47,15 @@ public class PlanRestController {
 	@PostMapping("/plan")
 	public ResponseEntity<String> savePlan(@org.springframework.web.bind.annotation.RequestBody Plan plan){
 		
-		String responseMsg = "";
+		String responseMsg = AppConstants.Empty_STR;
 		
 		boolean isSaved = planService.savePlan(plan);
 		
 		if(isSaved) {
-		responseMsg = "Plan saved";
+			
+			responseMsg = messages.get(AppConstants.PLAN_SAVE_SUCC);
 		}else {
-			responseMsg = "Plan not saved";		
+			responseMsg = messages.get(AppConstants.PLAN_SAVE_FAIL);
 		}
 		
 		return new ResponseEntity<>(responseMsg, HttpStatus.CREATED);
@@ -70,12 +83,12 @@ public class PlanRestController {
 		
 		boolean isDeleted = planService.deletePlanById(planId);
 		
-		String msg = "";
+		String msg = AppConstants.Empty_STR;
 		
 		if(isDeleted) {
-			msg="Plan Deleted";
+			msg=messages.get(AppConstants.PLAN_DELETE_SUCCESS);
 		}else {
-			msg = "Plan Not Deleted";
+			msg = messages.get(AppConstants.PLAN_DELETE_FAIL);
 		}
 		
 		return new ResponseEntity<>(msg, HttpStatus.OK);
@@ -85,13 +98,13 @@ public class PlanRestController {
 	public ResponseEntity<String> update(@org.springframework.web.bind.annotation.RequestBody Plan plan){
 		
 		boolean isUpdated = planService.updatePlan(plan);
-		
-		String msg = "";
+	
+		String msg = AppConstants.Empty_STR;
 		
 		if(isUpdated) {
-			msg="Plan Updated";
+			msg= messages.get(AppConstants.PLAN_UPDATE_SUCC);
 		}else {
-			msg = "Plan Not Updated";
+			msg = messages.get(AppConstants.PLAN_UPDATE_FAIL);
 		}
 		
 		return new ResponseEntity<>(msg, HttpStatus.OK);
@@ -101,14 +114,14 @@ public class PlanRestController {
 	@PutMapping("/status-change/{planId}/{status}")
 	public ResponseEntity<String> statusChange(Integer planId, String status){
 		
-		String msg = "";
+		String msg = AppConstants.Empty_STR;
 		
 		boolean isStatusChanged = planService.planStatusChange(planId, status);
 		
 		if(isStatusChanged) {
-			msg="status changed";
+			msg = messages.get(AppConstants.PLAN_STATUS_CHANGED_SUCC);
 		}else {
-			msg="status not changed";
+			msg=messages.get(AppConstants.PLAN_STATUS_CHANGED_FAIL);
 		}
 		
 		return new ResponseEntity<>(msg, HttpStatus.OK);
